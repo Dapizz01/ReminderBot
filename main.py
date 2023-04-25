@@ -19,7 +19,7 @@ async def web_app_data(update: Update, context: CallbackContext) -> None:
     load = json.loads(update.message.web_app_data.data)
     chat_id = update.effective_message.chat_id
     context.job_queue.run_once(
-        alarm, load["time"], chat_id=chat_id, name=str(chat_id), data=load["desc"])
+        alarm, load["input"], chat_id=chat_id, name=str(chat_id), data=load["text"])
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
