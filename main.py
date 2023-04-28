@@ -3,6 +3,7 @@ from telegram import Update, KeyboardButton, ReplyKeyboardMarkup, WebAppInfo
 from telegram.ext import ApplicationBuilder, CallbackContext, CommandHandler, MessageHandler, filters, Application, ContextTypes
 import json
 import os
+import datetime
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -12,14 +13,18 @@ logging.basicConfig(
 
 async def alarm(context: ContextTypes.DEFAULT_TYPE) -> None:
     job = context.job
+    if job.data == '':
+        job.data = 'Alarm off!'
     await context.bot.send_message(job.chat_id, text=job.data)
 
 
 async def web_app_data(update: Update, context: CallbackContext) -> None:
     load = json.loads(update.message.web_app_data.data)
     chat_id = update.effective_message.chat_id
+    print(load)
     context.job_queue.run_once(
-        alarm, load["input"], chat_id=chat_id, name=str(chat_id), data=load["text"])
+        alarm, datetime.time(load["hours"], load["minutes"]), chat_id=chat_id, name=str(chat_id), data=load["message"])
+    await context.bot.send_message(update.effective_chat.id, text="Got it! I will deliver a notification in " + load["input"] + " seconds!")
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
