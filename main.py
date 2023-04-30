@@ -22,9 +22,14 @@ async def web_app_data(update: Update, context: CallbackContext) -> None:
     load = json.loads(update.message.web_app_data.data)
     chat_id = update.effective_message.chat_id
     print(load)
-    context.job_queue.run_once(
-        alarm, datetime.time(load["hours"], load["minutes"]), chat_id=chat_id, name=str(chat_id), data=load["message"])
-    await context.bot.send_message(update.effective_chat.id, text="Got it! I will deliver a notification in " + load["input"] + " seconds!")
+    if load["type"] == "time":
+        context.job_queue.run_once(
+            alarm, datetime.time(load["hours"], load["minutes"]), chat_id=chat_id, name=str(chat_id), data=load["message"])
+        await context.bot.send_message(update.effective_chat.id, text="Got it! I will deliver a notification at " + load["hours"] + ":" + load["minutes"] + "")
+    else:
+        context.job_queue.run_once(
+            alarm, datetime.datetime(load["year"], load["month"], load["day"], load["hours"], load["minutes"]), chat_id=chat_id, name=str(chat_id), data=load["message"])
+        await context.bot.send_message(update.effective_chat.id, text="Got it! I will deliver a notification at the date you just picked")
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
